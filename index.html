@@ -14,7 +14,6 @@
             background-attachment: fixed;
             min-height: 100vh;
         }
-        /* ব্যাকগ্রাউন্ড লোগো */
         body::before {
             content: "";
             position: fixed;
@@ -42,75 +41,61 @@
     </header>
 
     <nav class="sticky top-4 z-50 mx-6 -mt-8 bg-white/90 backdrop-blur rounded-2xl flex p-1 shadow-lg border border-white">
-        <button onclick="showTab('in')" id="btn-in" class="flex-1 py-3 text-[12px] font-bold rounded-xl bg-[#014c22] text-white transition-all">ইনকামিং</button>
+        <button onclick="showTab('in')" id="btn-in" class="flex-1 py-3 text-[12px] font-bold rounded-xl bg-[#014c22] text-white">ইনকামিং</button>
         <button onclick="showTab('out')" id="btn-out" class="flex-1 py-3 text-[12px] font-bold rounded-xl text-slate-500">আউটগোয়িং</button>
         <button onclick="showTab('inv')" id="btn-inv" class="flex-1 py-3 text-[12px] font-bold rounded-xl text-slate-500">রিপোর্ট</button>
     </nav>
 
     <main class="p-5 max-w-lg mx-auto space-y-6">
         <section id="stock-in" class="tab-content active bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-            <h2 class="text-[#014c22] font-bold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-circle-plus"></i> মালামাল এন্ট্রি
-            </h2>
+            <h2 class="text-[#014c22] font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-circle-plus"></i> মালামাল এন্ট্রি</h2>
             <div class="space-y-4">
                 <input type="text" id="inName" placeholder="মালামালের নাম" class="w-full p-4 bg-slate-50 rounded-xl outline-none border focus:border-[#014c22]">
                 <div class="grid grid-cols-2 gap-3">
                     <input type="number" id="inPrice" placeholder="দর (৳)" class="w-full p-4 bg-slate-50 rounded-xl border">
                     <input type="number" id="inQty" placeholder="পরিমাণ" class="w-full p-4 bg-slate-50 rounded-xl border">
                 </div>
-                <button onclick="addStockIn()" class="w-full bg-[#014c22] text-white py-4 rounded-xl font-bold shadow-lg hover:bg-[#013618] active:scale-95 transition-all">সেভ করুন</button>
+                <button onclick="addStockIn()" class="w-full bg-[#014c22] text-white py-4 rounded-xl font-bold shadow-lg">সেভ করুন</button>
             </div>
         </section>
 
         <section id="stock-out" class="tab-content hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-            <h2 class="text-red-700 font-bold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-minus-circle"></i> মালামাল ইস্যু
-            </h2>
+            <h2 class="text-red-700 font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-minus-circle"></i> মালামাল ইস্যু</h2>
             <div class="space-y-4">
                 <select id="outName" class="w-full p-4 bg-slate-50 rounded-xl border font-bold text-slate-700 outline-none"></select>
                 <input type="number" id="outQty" placeholder="পরিমাণ" class="w-full p-4 bg-slate-50 rounded-xl border">
-                <button onclick="addStockOut()" class="w-full bg-red-700 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-red-800 active:scale-95 transition-all">ইস্যু কনফার্ম</button>
+                <button onclick="addStockOut()" class="w-full bg-red-700 text-white py-4 rounded-xl font-bold">ইস্যু কনফার্ম</button>
             </div>
         </section>
 
         <section id="inventory" class="tab-content hidden bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
             <div class="bg-[#014c22] p-5 text-white flex justify-between items-center">
-                <span class="font-bold flex items-center gap-2"><i class="fa-solid fa-chart-line"></i> মজুদ খতিয়ান</span>
+                <span class="font-bold">মজুদ খতিয়ান</span>
                 <span id="totalValue" class="font-black text-yellow-400">৳0</span>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-slate-50 text-slate-500">
-                        <tr>
-                            <th class="p-4 text-left font-semibold">বিবরণ</th>
-                            <th class="p-4 text-center font-semibold">মজুদ</th>
-                            <th class="p-4 text-right font-semibold">মোট মূল্য</th>
-                        </tr>
+                        <tr><th class="p-4 text-left">বিবরণ</th><th class="p-4 text-center">মজুদ</th><th class="p-4 text-right">মূল্য</th></tr>
                     </thead>
-                    <tbody id="inventoryBody" class="divide-y divide-slate-100">
-                        </tbody>
+                    <tbody id="inventoryBody" class="divide-y divide-slate-100"></tbody>
                 </table>
             </div>
         </section>
     </main>
 
     <script>
-        // ডাটাবেস লোড করা
         let db = JSON.parse(localStorage.getItem('bfidc_v10')) || { in: [], out: [] };
 
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
             document.getElementById('stock-' + (id === 'inv' ? 'inventory' : id)).classList.remove('hidden');
-            
             document.querySelectorAll('nav button').forEach(b => {
                 b.classList.remove('bg-[#014c22]', 'text-white');
                 b.classList.add('text-slate-500');
             });
-            
             const activeBtn = document.getElementById('btn-' + id);
             activeBtn.classList.add('bg-[#014c22]', 'text-white');
-            activeBtn.classList.remove('text-slate-500');
-
             if(id === 'out') updateOutSelect();
             if(id === 'inv') updateInventory();
         }
@@ -119,38 +104,26 @@
             const name = document.getElementById('inName').value.trim();
             const price = parseFloat(document.getElementById('inPrice').value);
             const qty = parseFloat(document.getElementById('inQty').value);
-            
-            if(!name || isNaN(price) || isNaN(qty)) return alert("সবগুলো ঘর সঠিকভাবে পূরণ করুন");
-            
-            db.in.push({ name, price, qty, date: new Date().toLocaleDateString() });
+            if(!name || isNaN(price) || isNaN(qty)) return alert("সঠিক তথ্য দিন");
+            db.in.push({ name, price, qty });
             saveDB();
-            alert("সফলভাবে সেভ হয়েছে");
+            alert("সেভ হয়েছে");
             document.getElementById('inName').value = '';
-            document.getElementById('inPrice').value = '';
-            document.getElementById('inQty').value = '';
         }
 
         function updateOutSelect() {
             const select = document.getElementById('outName');
             const items = [...new Set(db.in.map(i => i.name))];
-            if(items.length === 0) {
-                select.innerHTML = '<option value="">কোনো মালামাল নেই</option>';
-            } else {
-                select.innerHTML = items.map(i => `<option value="${i}">${i}</option>`).join('');
-            }
+            select.innerHTML = items.map(i => `<option value="${i}">${i}</option>`).join('');
         }
 
         function addStockOut() {
             const name = document.getElementById('outName').value;
             const qty = parseFloat(document.getElementById('outQty').value);
-            
-            if(!name) return alert("মালামাল সিলেক্ট করুন");
-            if(isNaN(qty) || qty <= 0) return alert("সঠিক পরিমাণ দিন");
-            
-            db.out.push({ name, qty, date: new Date().toLocaleDateString() });
+            if(!name || isNaN(qty)) return alert("তথ্য সঠিক নয়");
+            db.out.push({ name, qty });
             saveDB();
-            alert("ইস্যু সফল হয়েছে");
-            document.getElementById('outQty').value = '';
+            alert("ইস্যু সফল");
         }
 
         function updateInventory() {
@@ -158,7 +131,6 @@
             table.innerHTML = "";
             let itemNames = [...new Set(db.in.map(i => i.name))];
             let grandTotal = 0;
-
             itemNames.forEach(name => {
                 const totalIn = db.in.filter(i => i.name === name).reduce((s, i) => s + i.qty, 0);
                 const totalOut = db.out.filter(i => i.name === name).reduce((s, i) => s + i.qty, 0);
@@ -166,14 +138,7 @@
                 const balance = totalIn - totalOut;
                 const totalValue = balance * lastPrice;
                 grandTotal += totalValue;
-
-                table.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="p-4 font-bold text-slate-700">${name}</td>
-                        <td class="p-4 text-center font-semibold ${balance <= 5 ? 'text-red-500' : 'text-slate-600'}">${balance}</td>
-                        <td class="p-4 text-right font-black text-[#014c22]">৳${totalValue.toLocaleString()}</td>
-                    </tr>
-                `;
+                table.innerHTML += `<tr><td class="p-4 font-bold">${name}</td><td class="p-4 text-center">${balance}</td><td class="p-4 text-right">৳${totalValue.toLocaleString()}</td></tr>`;
             });
             document.getElementById('totalValue').innerText = "৳" + grandTotal.toLocaleString();
         }
